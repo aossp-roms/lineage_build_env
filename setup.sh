@@ -55,7 +55,7 @@ git config --global color.ui true
 
 # Create directories
 mkdir -p ~/bin
-mkdir -p ~/android/lineageos/
+mkdir -p ~/android/system/
 
 # Install repo tool
 curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
@@ -63,20 +63,20 @@ chmod a+x ~/bin/repo
 
 # Initialize repo
 cd ~/android/lineageos/
-repo init -u git://github.com/lineageos/android.git -b $lineage_version
+repo init -u git://github.com/aossp-roms/aossp-repos.git -b $lineage_version
 
 # Switch to our custom local_manifest
 if [[ $custom_local_manifest = "true" ]]
 then
-cd ~/android/lineageos/.repo
+cd ~/android/system/.repo
 rm -rf local_manifests
 git clone $custom_local_manifest_url
-cd ~/android/lineageos/
+cd ~/android/system/
 fi
 
 # Sync repo
 losBANNER "Syncing Repo..."
-repo sync --force-sync
+repo sync --no-clone-bundle --force-sync --no-tags --optimized-fetch -j$(nproc --all) -c
 
 # Environment setup
 source build/envsetup.sh
@@ -88,18 +88,18 @@ breakfast $device
 # Get device specific vendor files
 if [[ $custom_local_manifest != "true" ]]
 then
-cd ~/android/lineageos/vendor
+cd ~/android/system/vendor
 mkdir -p $vendor_path
 mkdir -p temp
-cd ~/android/lineageos/vendor/$vendor_path
+cd ~/android/system/vendor/$vendor_path
 git clone $vendor_files_git
-cp -r ~/android/lineageos/vendor/$vendor_path/*/* ~/android/lineageos/vendor/temp
-cd ~/android/lineageos/vendor
-rm -rf ~/android/lineageos/vendor/$vendor_path
+cp -r ~/android/system/vendor/$vendor_path/*/* ~/android/system/vendor/temp
+cd ~/android/system/vendor
+rm -rf ~/android/system/vendor/$vendor_path
 mkdir -p $vendor_path
-cp -r ~/android/lineageos/vendor/temp/* ~/android/lineageos/vendor/$vendor_path
-rm -rf ~/android/lineageos/vendor/temp
-cd ~/android/lineageos/
+cp -r ~/android/system/vendor/temp/* ~/android/system/vendor/$vendor_path
+rm -rf ~/android/system/vendor/temp
+cd ~/android/system/
 
 # Repeating breakfast after vendor files in case sth went wrong previously
 breakfast $device
